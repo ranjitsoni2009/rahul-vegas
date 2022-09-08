@@ -1,0 +1,13 @@
+{
+  "role": {
+    "name": "VEGAS (Video English General Activities Service"
+  },
+
+  "preview": {
+    "instrumentation": {
+      "azureSdk": {
+        "enabled": true
+      }
+    }
+  }
+}

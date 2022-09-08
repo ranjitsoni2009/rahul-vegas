@@ -1,0 +1,327 @@
+type Query {
+
+    me: DomainUser!
+    users(id: Int): [DomainUser]!
+    availability(filter: QueryAvailabilityFilter) : [Availability]!
+    contentInfos : [ContentInfo]!
+    contentPublishingPlans : [ContentPublishingPlan]!
+    contentPerformingAccreditations: [ContentPerformingAccreditation]!
+    "What seats are bookable for a given date range and CapLevel"
+    bookability(filter: BookabilityFilter) : [Bookability]!
+    parentInfo(filter: ParentInfoFilter): Parent
+}
+
+
+type Mutation {
+createUser(input: CreateUserInput!) : DomainUser!
+updateUser(input: UpdateUserInput!) : DomainUser!
+
+createAvailability(input: CreateAvailabilityInput!) : Availability!
+
+createContentInfo(input: CreateContentInfoInput!) : ContentInfo!
+createContentPublishingPlan(input: CreateContentPublishingPlanInput) : ContentPublishingPlan!
+
+"Adds which domain user can perform which content, returning the updated content"
+createContentPerformingAccreditation(input: CreateContentPerformingAccreditationInput) : ContentPerformingAccreditation!
+
+createParent(input: CreateParentInput) : Parent!
+
+createBooking(input: CreateBookingInput) : Booking!
+}
+
+input BookabilityFilter {
+    capLevel: CapLevel
+    from: DateTime
+    to: DateTime
+}
+
+input ParentInfoFilter {
+    externalId: String!
+}
+
+input CreateBookingInput {
+	"""
+	externalChildId is being used to identify the child against whom, booking need to be created.
+	Client need to send externalChildId even though parent child is already exist or not.
+	"""
+    externalChildId: String!
+    contentId: Int!
+    lessonTime: DateTime!
+    createParentInput: CreateParentInput
+    """
+    The timeout of the booking in minutes.
+    Values  <= 0, there is no timeout and the booking is instantly confirmed.
+    Otherwise, values > 0 and the booking has not yet been confirmed, afterwards in minutes the booking will be set to TIMED_OUT and the seat released.
+    The parent will have to make a new booking for a different seat.
+    If no value is provided, a default timeout period is used. The timeout cutoff time is returned in the booking.
+    """
+    timeoutMinutes: Int
+}
+
+type Bookability {
+    content: ContentInfo
+    bookablePeriods: [BookablePeriod]!
+}
+
+type BookablePeriod {
+    from: DateTime!
+
+    "A count of seats that are ready to teach the content, at the given time."
+    freeSeatsCount: Int!
+
+    "A count of seats that have already been booked to teach the content, at the given time."
+    bookedSeatsCount: Int!
+
+    """
+    A count of periods where teachers are ready to be booked to teach the content, at the given time.
+    A period gets turned into seats, the first time it's booked.
+    """
+    freePeriodsCount: Int!
+}
+
+type Parent { uniqueExternalId: String!
+    id: Int!
+    givenName: String
+    familyName: String
+    displayName: String!
+
+    children: [Child]!
+    bookings: [Booking]!
+}
+
+type Child {
+    id: Int!
+    parent: Parent!
+    uniqueExternalId: String!
+    displayName: String!
+    capLevel: CapLevel!
+    dateOfBirth: Date!
+
+    bookings: [Booking]!
+}
+
+
+
+input CreateContentPerformingAccreditationInput {
+    contentInfoId: Int!
+    domainUserId: Int!
+}
+
+input CreateContentPublishingPlanInput {
+    contentId: Int!
+    from: DateTime!
+    to: DateTime!
+    #This is using a string rather than a CountryCode, as that does not deserialize properly as a Kotlin enum in DGS on Java 17"
+    countries: [String]
+}
+
+input CreateContentInfoInput {
+    name: String!
+    description: String
+    externalUrl: String!
+    level: CapLevel!
+}
+
+input CreateParentInput {
+    uniqueExternalId: String!
+    givenName: String
+    familyName: String
+    displayName: String!
+
+    children: [CreateChildInput]!
+}
+
+input CreateChildInput {
+    uniqueExternalId: String!
+    displayName: String!
+    capLevel: CapLevel!
+    dateOfBirth: Date!
+}
+
+
+input CreateUserInput {
+    givenName: String!
+    familyName: String!
+    email: String!
+
+    canTeach: Boolean
+    canAdmin: Boolean
+}
+
+input UpdateUserInput {
+id: Int!
+
+canTeach: Boolean
+canAdmin: Boolean
+}
+
+input QueryAvailabilityFilter {
+from: DateTime!
+to: DateTime!
+}
+
+input CreateAvailabilityInput {
+from: DateTime!
+to: DateTime!
+
+ownerId: Int!
+
+isBookable: Boolean
+}
+
+type ContentPerformingAccreditation {
+id: Int!
+
+"The VEGAS user that is accredited to teach the content."
+domainUser: DomainUser!
+
+"The content the user is accredited to perform"
+contentInfo: ContentInfo!
+
+isAccredited: Boolean!
+
+created: DateTime!
+updated: DateTime!
+}
+
+type ContentInfo {
+id: Int!
+name: String!
+description: String
+
+level: CapLevel!
+
+"A list of start & end times that this content is available to be booked"
+publishingPlans: [ContentPublishingPlan]
+
+"A list of DomainUsers that have been approved to deliver this content"
+accreditedPerformers: [ContentPerformingAccreditation]
+
+externalUrl: String!
+
+created: DateTime!
+updated: DateTime!
+}
+
+type ContentPublishingPlan {
+id: Int!
+from: DateTime!
+to: DateTime!
+
+content: ContentInfo!
+countries: [CountryCode]
+
+created: DateTime!
+updated: DateTime!
+}
+
+type DomainUser {
+id: Int!
+givenName: String!
+familyName: String!
+email: String!
+
+activeDirectoryId: String
+
+availability: [Availability]!
+
+canTeach: Boolean
+canAdmin: Boolean
+}
+
+type Availability {
+id: Int!
+owner: DomainUser!
+
+from: DateTime!
+to: DateTime!
+
+isBookable: Boolean
+
+periods: [Period]!
+}
+
+type Period {
+id: Int!
+
+from: DateTime!
+to: DateTime!
+
+isBookable: Boolean
+
+type: PeriodType
+}
+
+type Booking {
+    id: Int!
+    status: BookingStatus!
+    "The seat that has been reserved with this booking - may be null if the booking is unfulfillable."
+    seat: Seat
+
+    "When this booking would expire, if it's still in the PENDING status"
+    timeout: DateTime!
+
+    created: DateTime!
+    updated: DateTime!
+
+    child: Child!
+}
+
+type Lesson {
+    id: Int!
+    seats: [Seat]!
+    period: Period!
+    maxSeats: Int!
+    region: String!
+    content: String!
+    zoomMeetingUrl: String
+}
+
+type Seat {
+id: Int!
+lesson: Lesson!
+
+region: String!
+content: String!
+
+booking: Booking!
+}
+
+enum BookingStatus {
+    "There are no teachers available to fulfill this booking request"
+    UNFULFILLABLE
+
+    "The booking request is in progress, a seat has been assigned, but the client has not yet confirmed/paid the booking."
+    PENDING
+
+    "The client did not confirm the booking request in time and now the request has timed out and the seat put back into the pool."
+    TIMED_OUT
+
+    "The client has confirmed/paid the booking request and the seat is secured"
+    BOOKED
+
+    "The client or system cancelled the booking."
+    CANCELLED
+}
+
+
+
+enum PeriodType {
+CHECK_IN
+TEACHING
+}
+
+enum CapLevel {
+NONE,
+LIGHT_BLUE
+BLUE
+GREEN
+LIME
+YELLOW
+ORANGE
+}
+
+
+scalar DateTime
+scalar Date
+scalar CountryCode

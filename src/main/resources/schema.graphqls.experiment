@@ -1,0 +1,116 @@
+type Query {
+   users(id: ID): [BackOfficeUser]!
+}
+
+type Mutation {
+    addUser(input: AddUserInput) : User!
+#    createBooking(input: CreateBookingInput!): CreateBookingPayload!
+#    updateBooking(input: UpdateBookingInput!): UpdateBookingPayload!
+}
+
+
+"A declaration of a performer being available for a certain time period."
+input SubmitAvailabilityInput {
+    teacherId: ID!
+
+    "Start time of availability in UTC"
+    startTime: DateTime
+
+    "End time of availability in UTC"
+    endTime: DateTime
+
+    "Whether this availability is bookable by parents, or is unbookable, i.e. a substitute performer."
+    isBookable: boolean
+}
+
+type BackOfficeUser {
+     id: ID!
+     givenName: String!
+     familyName: String!
+     email: String!
+
+     canTeach: boolean
+     canAdmin: boolean
+}
+
+
+type Availability {
+    #teacher: Teacher
+
+    "Start time of availability in UTC"
+    startTime: DateTime
+
+    "End time of availability in UTC"
+    endTime: DateTime
+
+    "Whether this availability is bookable by parents, or is unbookable, i.e. a substitute performer."
+    isBookable: boolean
+
+    slots: [AvailabilitySlot]!
+}
+
+"Availability is cut into slots, hence an AvailabilitySlot is the smallest unit of bookable time."
+type AvailabilitySlot {
+    slotID: ID!
+    availability: Availability!
+    slotStartTime: DateTime!
+    slotEndTime: DateTime!
+    session: Session
+}
+
+type Session {
+    sessionID: ID!
+    associatedSlot: AvailabilitySlot
+    sessionStartTime
+}
+
+
+
+#
+# Mutation specific payloads
+#
+#input CreateBookingInput {
+#    bookingRequest: BookingRequest!
+#}
+
+#type CreateBookingPayload {
+#    booking: Booking!
+#}
+
+#input UpdateBookingInput {
+#    booking: Booking!
+#}
+
+#type UpdateBookingPayload {
+#    booking: Booking!
+#}
+
+"A paying user of the Video English Service"
+type Parent {
+    id: ID!
+    displayName: String!
+    bookings: [Booking]
+}
+
+"A booking of session between a student and a performer"
+type Booking {
+    id: ID!
+    "The UTC date-time of when the session will start"
+    startTime: DateTime!
+    status: BookingStatus!
+}
+
+#input BookingRequest {
+#    startTime: DateTime!
+#    childId: ID!
+#}
+
+enum BookingStatus {
+    PENDING
+    EXPIRED
+    BOOKED
+    CANCELLED
+}
+
+
+scalar DateTime

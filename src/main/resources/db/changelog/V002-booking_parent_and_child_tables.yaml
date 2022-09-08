@@ -1,0 +1,173 @@
+databaseChangeLog:
+  - changeSet:
+      id: "2"
+      author: Alan_Stafford
+      changes:
+        - createTable:
+            tableName: child
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: display_name
+                  type: NVARCHAR(255)
+
+              - column:
+                  name: external_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: cap_level
+                  type: VARCHAR(255)
+
+              - column:
+                  name: parent_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_parent_child
+                    references: parent(id)
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+        - createTable:
+            tableName: seat
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: content_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_content_seat
+                    references: content_info(id)
+
+              - column:
+                  name: booking_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_booking_seat
+                    references: booking(id)
+
+              - column:
+                  name: lesson_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_lesson_seat
+                    references: lesson(id)
+
+              - column:
+                  name: start_time
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: version
+                  type: bigint
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+        - addColumn:
+            tableName: parent
+            columns:
+              - column:
+                  name: external_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: display_name
+                  type: NVARCHAR(255)
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - addColumn:
+            tableName: booking
+            columns:
+              - column:
+                  name: booking_status
+                  type: VARCHAR(255)
+
+              - column:
+                  name: seat_id
+                  type: bigint
+
+              - column:
+                  name: child_id
+                  type: bigint
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+        - addColumn:
+            tableName: lesson
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+
+              - column:
+                  name: content_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_content_lesson
+                    references: content_info(id)
+
+              - column:
+                  name: period_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_period_lesson
+                    references: period(id)
+
+        - addColumn:
+            tableName: period
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+
+

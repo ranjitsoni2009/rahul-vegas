@@ -1,0 +1,38 @@
+spring:
+  application:
+    profile: integrationtest
+
+  cloud:
+    azure:
+      active-directory:
+        b2c:
+          enabled: true
+          profile:
+            tenant-id: ${SSO_TENANT_ID:a13a8498-c94f-4dac-9cb1-1cbb1e742758}
+          app-id-uri: ${VEGAS_SCOPE_URI:https://wfeglobalb2cdev.onmicrosoft.com/vegas}         # If you are using v1.0 token, please configure app-id-uri for `aud` verification
+          credential:
+            client-id: ${VEGAS_APP_ID:dbf9e7a3-5dd9-4175-b246-0b5ec1bce543}           # If you are using v2.0 token, please configure client-id for `aud` verification
+          base-uri: ${SSO_BASE_URI:https://wfeglobalb2cdev.b2clogin.com}             # Such as: https://xxxxb2c.b2clogin.com
+          user-flows: # is this really needed?, we're not signing directly into this service. This is a resource. Test removing this.
+            sign-up-or-sign-in: ${SIGN_UP_OR_SIGN_IN_USER_FLOW_NAME:B2C_1_phone_based_sign_in_and_sign_up}
+
+  datasource:
+    url:  jdbc:tc:sqlserver:2017-CU12:///test
+#    username: sa
+#    password: password
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

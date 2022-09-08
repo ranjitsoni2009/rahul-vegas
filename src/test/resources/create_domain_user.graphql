@@ -1,0 +1,11 @@
+mutation {
+    createUser(input: {
+        givenName: "Alan"
+        familyName: "Stafford"
+        email: "alanstafford@worldfamilyenglish"
+        canTeach: true
+        canAdmin: true
+    }) {
+        id
+    }
+}

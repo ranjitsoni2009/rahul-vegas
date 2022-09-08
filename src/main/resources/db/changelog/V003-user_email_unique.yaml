@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: "3"
+      author: Shubham_A
+      changes:
+        addUniqueConstraint:
+          columnNames: email
+          tableName: domain_user

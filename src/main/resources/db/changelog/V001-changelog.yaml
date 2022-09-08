@@ -1,0 +1,303 @@
+databaseChangeLog:
+  - changeSet:
+      id: "1"
+      author: Rahul_K
+      changes:
+        - createTable:
+            tableName: domain_user
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: family_name
+                  type: VARCHAR(256)
+
+              - column:
+                  name: given_name
+                  type: VARCHAR(256)
+
+              - column:
+                  name: active_directory_id
+                  type: VARCHAR(256)
+
+              - column:
+                  name: email
+                  type: VARCHAR(256)
+
+              - column:
+                  name: can_teach
+                  type: boolean
+
+              - column:
+                  name: can_admin
+                  type: boolean
+              
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - createTable:
+            tableName: availability
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: from_time
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: to_time
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: is_bookable
+                  type: boolean
+              
+              - column:
+                  name: owner
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_availability_domain_user
+                    references: domain_user(id)
+              
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column: 
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - createTable:
+            tableName: booking
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+
+        - createTable:
+            tableName: content_info
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: cap_level
+                  type: VARCHAR(64)
+
+              - column:
+                  name: name
+                  type: varchar(64)
+
+              - column:
+                  name: description
+                  type: VARCHAR(256)
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column: 
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - createTable:
+            tableName: content_performing_accreditation
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_content_performing_accreditation_domain_user
+                    references: domain_user(id)
+
+              - column:
+                  name: content_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_content_performing_accreditation_content_info
+                    references: content_info(id)
+
+              - column:
+                  name: is_accredited
+                  type: boolean
+                  
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - createTable:
+            tableName: content_publishing_plan
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              
+              - column:
+                  name: from_time
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: to_time
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: content_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_content_publishing_plan_content_info
+                    references: content_info(id)
+              
+              - column:
+                  name: countries
+                  type: VARCHAR(MAX)
+
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+
+
+        - createTable: 
+            tableName: lesson
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: subject
+                  type: VARCHAR(64)
+              
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+                  
+        
+        - createTable: 
+            tableName: parent
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        
+            
+        - createTable: 
+            tableName: period
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: is_bookable
+                  type: boolean
+
+              - column:
+                  name: from_time
+                  type: TIMESTAMP(3)
+                  
+              - column:
+                  name: to_time
+                  type: TIMESTAMP(3)
+              
+              - column:
+                  name: lesson_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_lesson_period
+                    references: lesson(id)
+              
+              - column:
+                  name: owner_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_owner_period
+                    references: domain_user(id)
+              
+              - column:
+                  name: owningAvailability_id
+                  type: bigint
+                  
+              - column:
+                  name: type
+                  type: VARCHAR(64)
+                  
+              - column:
+                  name: created
+                  type: TIMESTAMP(3)
+
+              - column:
+                  name: updated
+                  type: TIMESTAMP(3)
+   

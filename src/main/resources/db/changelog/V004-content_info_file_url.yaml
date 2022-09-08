@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: "4"
+      author: Shubham_A
+      changes:
+        - addColumn:
+            tableName: content_info
+            columns:
+              - column:
+                  name: external_url
+                  type: VARCHAR(3000)
+                  constraints:
+                    nullable: false
+        - addNotNullConstraint:
+            columnName: cap_level
+            tableName: content_info
+            columnDataType: VARCHAR(64)

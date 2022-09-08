@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/V001-changelog.yaml
+  - include:
+      file: db/changelog/V002-booking_parent_and_child_tables.yaml
+  - include:
+      file: db/changelog/V003-user_email_unique.yaml
+  - include:
+      file: db/changelog/V004-content_info_file_url.yaml
+  - include:
+      file: db/changelog/V005-zoom_meeting_url.yaml
+  - include:
+      file: db/changelog/V006-add_booking_timeout.yaml
+  - include:
+      file: db/changelog/V007-shedlock_definition.yaml

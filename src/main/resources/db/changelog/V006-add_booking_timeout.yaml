@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: "6"
+      author: Alan_Stafford
+      changes:
+      - addColumn:
+          tableName: booking
+          columns:
+            - column:
+                name: timeout
+                type: TIMESTAMP(3)
+                constraints:
+                  nullable: true

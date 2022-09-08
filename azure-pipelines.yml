@@ -1,0 +1,79 @@
+trigger:
+- master
+
+pool:
+      vmImage: ubuntu-latest
+      
+variables:
+  tag: '$(Build.BuildId)'
+  git_tag: $(Build.SourceVersion)
+  imageName: 'vegas'
+  deploymentName: 'vegas-deployment'
+  azureSubscription: 'Azure Resource Manager Subscription'
+  appRootName: 'WFE-VEGAS'
+  containerRegistryFullName: 'wfecontainerregistry.azurecr.io'
+  imageRepository: $(imageName)
+
+stages:
+- stage: Build_Test_Publish_Stage
+  jobs:
+    - job: Build_Test_Publish_Job
+      displayName: 'Building, Testing and Publishing'
+      steps:
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          javaHomeSelection: 'path'
+          jdkUserInputPath: $(JAVA_HOME_17_X64) # this is JDK found on 'ubuntu-latest' image
+          publishJUnitResults: true
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
+          codeCoverageToolOption: 'none' #'jaCoCo' # Optional. Options: none, cobertura, jaCoCo
+
+
+      - task: Docker@2
+        displayName: Building Docker Image, and Publishing Container Image to Azure Container Repository
+        inputs:
+          containerRegistry: 'registry-connection'
+          repository: ${{ variables.imageName }}
+          command: 'buildAndPush'
+          Dockerfile: '**/Dockerfile'
+          tags: |
+            $(tag)
+
+- stage: Push_to_Dev
+  jobs:
+    - deployment: DeployToDev
+      environment: DEV # this is the name of the environment configured in DevOps. It's only for approvals.
+      displayName: Deploying to Dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: AzureWebAppContainer@1
+              displayName: Azure Web App Container Deploy - DEV
+              inputs:
+                  azureSubscription: $(azureSubscription)
+                  appName: $(appRootName)-DEV # We need dev & prod versions
+                  containers: $(containerRegistryFullName)/$(imageRepository):$(tag)
+
+
+- stage: Push_to_Prod
+  jobs:
+    - deployment: DeployToProd
+      environment: PROD
+      displayName: Deploying to Prod
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: AzureWebAppContainer@1
+                displayName: Azure Web App Container Deploy - PROD
+                inputs:
+                  azureSubscription: $(azureSubscription)
+                  appName: $(appRootName)-PROD # We need dev & prod versions
+                  containers: $(containerRegistryFullName)/$(imageRepository):$(tag)
+
+

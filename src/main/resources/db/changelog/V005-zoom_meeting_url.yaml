@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: "4"
+      author: Rahul_K
+      changes:
+        - addColumn:
+            tableName: lesson
+            columns:
+            - column:
+                name: zoom_meeting_url
+                type: varchar(max)
+                constraints:
+                    nullable: true
